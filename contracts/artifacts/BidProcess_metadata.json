@@ -182,6 +182,44 @@
 						"type": "uint256"
 					}
 				],
+				"name": "getCurrentBidAmount",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_index",
+						"type": "uint256"
+					}
+				],
+				"name": "getCurrentBidOwner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_index",
+						"type": "uint256"
+					}
+				],
 				"name": "getStatus",
 				"outputs": [
 					{
@@ -300,11 +338,11 @@
 			]
 		},
 		"contracts/BidProcess.sol": {
-			"keccak256": "0x29b79bb60ff89d711b6510668e7e4b505766828c0c2bcf8ccf03f3088ee748a1",
+			"keccak256": "0x0118843bd0160364db5891241bbe29af4fbc2f7589f55a079d5471e4b1e721e4",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f30bc0c468c595b33889920d29985e2479592269e95a94d70fd7e24aaf2f2dcf",
-				"dweb:/ipfs/Qmez6H1Qopga5jkFSnzmVLyhq34XqQpqr1ScZTJ1aF1La5"
+				"bzz-raw://5ef801e0df0f1f6914ae26ee01c9cb46c6aa0da706ee372119df513e270827fa",
+				"dweb:/ipfs/QmetR37oBjGUFAhjQJbHtu2y4CVapMZXbQqtHb5npUd32e"
 			]
 		},
 		"node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol": {

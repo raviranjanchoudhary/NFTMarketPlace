@@ -93,6 +93,15 @@ contract BidProcess{
         return false;
         }
 
+    function getCurrentBidOwner(uint256 _index) public view returns (address) { 
+        return bidings[_index].currentBidOwner; 
+        }
+
+    function getCurrentBidAmount(uint256 _index) public view returns (uint256) { 
+        return bidings[_index].currentBidAmount; 
+        }
+
+
     function isActive(uint256 _index) public view returns (bool) {
         return getStatus(_index) == Status.active; 
         }

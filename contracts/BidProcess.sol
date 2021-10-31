@@ -9,6 +9,13 @@ contract BidProcess{
 
     using AddressUtils for address;
 
+    event CreateNewBid(uint256 _index, address _creator, address _asset, address _token);
+    event NewBid(uint256 _index, address _bidder, uint256 _amount);
+    event Claim(uint256 _bidIndex, address _claimer);
+
+    
+    enum Status { pending, active, finished }
+
     struct BidInfo{
         address assetAddress;
         uint256 assetId;
@@ -17,11 +24,11 @@ contract BidProcess{
         uint256 startTime;
         uint256 duration;
         uint256 currentBidAmount;
-        uint256 currentBidOwner;
+        address currentBidOwner;
         uint256 bidCount;
     }
 
-    BidProcess[] private bidings;
+    BidInfo[] private bidings;
 
     function createNewBid(address _assetAddress,
                           uint256 _assetId,
@@ -31,7 +38,7 @@ contract BidProcess{
                           uint256 _duration) public returns(uint256){
         require(_assetAddress.isContract());
         ERC721 asset = ERC721(_assetAddress);
-        require(asset.ownerOf(_assetId)=msg.sender);
+        require(asset.ownerOf(_assetId)==msg.sender);
         require(asset.getApproved(_assetId)==address(this));
         require(_tokenAddress.isContract());
 
@@ -55,33 +62,83 @@ contract BidProcess{
 
         uint256 index=bidings.length-1;
 
-        emit createNewBid(index,bidInfo.creator,bidInfo.assetAddress,bidInfo.tokenAddress);
+        emit CreateNewBid(index,bidInfo.creator,bidInfo.assetAddress,bidInfo.tokenAddress);
         
         return index;
      }
 
-     function bid(uint256 _bidIndex,
-                  uint256 _amount) public returns(bool){
+    function bid(uint256 _bidIndex,
+                 uint256 _amount) public returns(bool){
         
         BidInfo storage bidInfo = bidings[_bidIndex];
         require(bidInfo.creator!=address(0));
         require(isActive(_bidIndex));
 
-        if(amount>bidInfo.currentBidAmount){
+        if(_amount>bidInfo.currentBidAmount){
 
             ERC20 token=ERC20(bidInfo.tokenAddress);
-            require(token.transferFrom(msg.sender,address(this),amount));
+            require(token.transferFrom(msg.sender,address(this),_amount));
             if(bidInfo.currentBidAmount!=0){
                 token.transfer(bidInfo.currentBidOwner,bidInfo.currentBidAmount);
             }
 
-            bidInfo.currentBidAmount=amount;
+            bidInfo.currentBidAmount=_amount;
             bidInfo.currentBidOwner=msg.sender;
             bidInfo.bidCount=bidInfo.bidCount+1;
 
+            emit NewBid(_bidIndex,msg.sender,_amount);
             return true;
             }
         
         return false;
         }
+
+    function isActive(uint256 _index) public view returns (bool) {
+        return getStatus(_index) == Status.active; 
+        }
+
+    function isFinished(uint256 _index) public view returns (bool) { 
+        return getStatus(_index) == Status.finished; 
+        }
+
+    function getStatus(uint256 _index) public view returns (Status) {
+        BidInfo storage bidInfo = bidings[_index];
+        if (block.timestamp < bidInfo.startTime) {
+            return Status.pending;
+        } else if (block.timestamp < (bidInfo.startTime + (bidInfo.duration))) {
+            return Status.active;
+        } else {
+            return Status.finished;
+        }
+    }
+
+    function getWinner(uint256 _index) public view returns (address) {
+        require(isFinished(_index));
+        return bidings[_index].currentBidOwner;
+    }
+
+    function claimAsset(uint256 _bidIndex) public{
+        require(isFinished(_bidIndex));
+        BidInfo storage bidInfo = bidings[_bidIndex];
+
+        address winner = getWinner(_bidIndex);
+        require(winner==msg.sender);
+
+        ERC721 asset = ERC721(bidInfo.assetAddress);
+        asset.transferFrom(bidInfo.creator,winner,bidInfo.assetId);
+
+        emit Claim(_bidIndex,winner);
+    }
+
+    function claimTokens(uint256 _bidIndex) public{
+        require(isFinished(_bidIndex));
+        BidInfo storage bidInfo = bidings[_bidIndex];
+
+        require(bidInfo.creator==msg.sender);
+
+        ERC20 token = ERC20(bidInfo.tokenAddress);
+        require(token.transfer(bidInfo.creator,bidInfo.currentBidAmount));
+
+        emit Claim(_bidIndex,bidInfo.creator);
+    }
 }

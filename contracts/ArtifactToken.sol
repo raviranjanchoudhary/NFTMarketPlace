@@ -15,10 +15,12 @@ contract ArtifactToken is ERC721{
     event Mint(uint256 artIndex, address owner);
 
     constructor() ERC721("Artifact Token","ATT"){
-
+        _mintArtifcat(msg.sender, "Rosetta Stone", "John");
     }
 
-    function _mintArtifcat(address owner, string memory name, string memory createdBy) internal returns (uint256){
+    function _mintArtifcat(address owner, 
+                           string memory name, 
+                           string memory createdBy) internal returns (uint256){
 
         Artifact memory artifact = Artifact({
             name:name,

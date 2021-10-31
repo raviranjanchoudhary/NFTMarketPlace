@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import '../node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import '../node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import "./AddressUtils.sol";
 
 contract BidProcess{
@@ -78,7 +78,7 @@ contract BidProcess{
 
             ERC20 token=ERC20(bidInfo.tokenAddress);
             require(token.transferFrom(msg.sender,address(this),_amount));
-            if(bidInfo.currentBidAmount!=0){
+            if(bidInfo.currentBidAmount!=0 && bidInfo.currentBidOwner!=address(0)){
                 token.transfer(bidInfo.currentBidOwner,bidInfo.currentBidAmount);
             }
 
@@ -141,4 +141,7 @@ contract BidProcess{
 
         emit Claim(_bidIndex,bidInfo.creator);
     }
+
+    function getTotalBids() public view returns (uint256) { return bidings.length; }
+
 }

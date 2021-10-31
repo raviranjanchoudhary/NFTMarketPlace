@@ -51,5 +51,13 @@ contract BidProcess{
             bidCount:0
         });
 
-                          }
+        bidings.push(bidInfo);
+
+        uint256 index=bidings.length-1;
+
+        emit createNewBid(index,bidInfo.creator,bidInfo.assetAddress,bidInfo.tokenAddress);
+        
+        return index;
+
+     }
 }

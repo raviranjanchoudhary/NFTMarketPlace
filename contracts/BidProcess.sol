@@ -58,6 +58,30 @@ contract BidProcess{
         emit createNewBid(index,bidInfo.creator,bidInfo.assetAddress,bidInfo.tokenAddress);
         
         return index;
-
      }
+
+     function bid(uint256 _bidIndex,
+                  uint256 _amount) public returns(bool){
+        
+        BidInfo storage bidInfo = bidings[_bidIndex];
+        require(bidInfo.creator!=address(0));
+        require(isActive(_bidIndex));
+
+        if(amount>bidInfo.currentBidAmount){
+
+            ERC20 token=ERC20(bidInfo.tokenAddress);
+            require(token.transferFrom(msg.sender,address(this),amount));
+            if(bidInfo.currentBidAmount!=0){
+                token.transfer(bidInfo.currentBidOwner,bidInfo.currentBidAmount);
+            }
+
+            bidInfo.currentBidAmount=amount;
+            bidInfo.currentBidOwner=msg.sender;
+            bidInfo.bidCount=bidInfo.bidCount+1;
+
+            return true;
+            }
+        
+        return false;
+        }
 }
